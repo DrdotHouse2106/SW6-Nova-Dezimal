@@ -13,10 +13,13 @@
     price: price,
     basePriceValue: novaDezimal.basePriceValue,
     pieceArea: novaDezimal.pieceArea,
+    rollWidth: novaDezimal.rollWidth,
     locale: app.request.locale|default('de-DE')|replace({'_': '-'}),
     currency: context.currency.isoCode,
     labelTotal: 'novaDezimal.total'|trans|striptags,
-    labelPieces: 'novaDezimal.piecesTotal'|trans|striptags
+    labelPieces: 'novaDezimal.piecesTotal'|trans|striptags,
+    labelUnitPrice: 'novaDezimal.unitPrice'|trans|striptags,
+    labelRunning: 'novaDezimal.runningMetres'|trans|striptags
 } %}
 <div class="nova-dezimal-info small text-muted mt-2"
      data-nova-dezimal="true"
@@ -39,4 +42,5 @@
         </div>
     {% endif %}
     <div class="nova-dezimal-total fw-semibold text-body" aria-live="polite"></div>
+    <div class="nova-dezimal-running text-body"></div>
 </div>

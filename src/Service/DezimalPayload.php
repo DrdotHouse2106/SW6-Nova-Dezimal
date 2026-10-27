@@ -36,7 +36,7 @@ final class DezimalPayload
     /**
      * Payload schreiben. $amount = Gesamtmenge in der Einheit (Wert bzw. Stück × Fläche).
      */
-    public static function write(LineItem $lineItem, DezimalSettings $settings, float $value, float $unitPrice, string $aliasKey = ''): void
+    public static function write(LineItem $lineItem, DezimalSettings $settings, float $value, float $unitPrice, string $aliasKey = '', ?float $positionPrice = null): void
     {
         $pieces = $settings->isPieceMode() ? $lineItem->getQuantity() : 1;
         $amount = $settings->isPieceMode() ? round($pieces * $settings->pieceArea, 4) : round($value, 4);
@@ -50,6 +50,10 @@ final class DezimalPayload
             'stueckmass' => $settings->isPieceMode() ? $settings->pieceArea : null,
             'gesamtmenge' => $amount,
             'preisJeEinheit' => round($unitPrice, 4),
+            'positionsPreis' => $positionPrice !== null ? round($positionPrice, 2) : null,
+            'rollenbreite' => $settings->rollWidth > 0 ? $settings->rollWidth : null,
+            'status' => 'berechnet',
+            'laufmeter' => $settings->isAmountMode() && $settings->runningMetres($amount) > 0 ? $settings->runningMetres($amount) : null,
         ]);
 
         if ($aliasKey === '' || $aliasKey === self::KEY) {

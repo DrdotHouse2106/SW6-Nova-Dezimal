@@ -24,6 +24,7 @@ class DezimalSettingsReader implements ResetInterface
     public const FIELD_STEP = 'nova_dezimal_schritt';
     public const FIELD_DEFAULT = 'nova_dezimal_vorgabe';
     public const FIELD_PIECE_AREA = 'nova_dezimal_stueckmass';
+    public const FIELD_ROLL_WIDTH = 'nova_dezimal_rollenbreite';
 
     /** Schlüssel der Einstellung „Feldzuordnung“ → eigenes Feld */
     private const MAP_KEYS = [
@@ -33,6 +34,7 @@ class DezimalSettingsReader implements ResetInterface
         'max' => self::FIELD_MAX,
         'schritt' => self::FIELD_STEP,
         'vorgabe' => self::FIELD_DEFAULT,
+        'rollenbreite' => self::FIELD_ROLL_WIDTH,
     ];
 
     private ?bool $blocked = null;
@@ -75,7 +77,7 @@ class DezimalSettingsReader implements ResetInterface
 
     /**
      * Einstellung „Feldzuordnung“: je Zeile „schlüssel=zusatzfeld“, z. B. „min=erp_mindestmenge“.
-     * Schlüssel: aktiv, einheit, bezeichnung, min, max, schritt, vorgabe, preisJe
+     * Schlüssel: aktiv, einheit, bezeichnung, min, max, schritt, vorgabe, rollenbreite, preisJe
      *
      * @return array<string, string>
      */
@@ -108,13 +110,13 @@ class DezimalSettingsReader implements ResetInterface
             return null;
         }
 
-        return $this->fromCustomFields($fields, $this->purchaseUnit($product), $this->unitName($product));
+        return $this->fromCustomFields($fields, $this->purchaseUnit($product), $this->unitName($product), $this->productName($product));
     }
 
     /**
      * @param array<string, mixed> $fields
      */
-    public function fromCustomFields(array $fields, ?float $purchaseUnit = null, ?string $productUnit = null): ?DezimalSettings
+    public function fromCustomFields(array $fields, ?float $purchaseUnit = null, ?string $productUnit = null, string $productName = ''): ?DezimalSettings
     {
         $map = $this->fieldMap();
         $mapped = [];
@@ -172,7 +174,13 @@ class DezimalSettingsReader implements ResetInterface
         $base = isset($map['preisJe']) ? (self::float($fields[$map['preisJe']] ?? null) ?? 1.0) : 1.0;
         $base = $base > 0 ? $base : 1.0;
 
-        return new DezimalSettings($mode, $unit, $label, $min, $max, $step, $default, $base, 0);
+        // Rollenbreite in mm: Feld bzw. Feldzuordnung, sonst aus dem Artikelnamen („Rollenbreite 1500mm“, „RB 1500mm“)
+        $rollWidth = self::float($value(self::FIELD_ROLL_WIDTH)) ?? 0.0;
+        if ($rollWidth <= 0 && preg_match('/(?:Rollenbreite|\bRB|Breite)\s*:?\s*(?:ca\.\s*)?(\d{3,4})(?:\s*-\s*\d{3,4})?\s*mm/iu', $productName, $m) === 1) {
+            $rollWidth = (float) $m[1];
+        }
+
+        return new DezimalSettings($mode, $unit, $label, $min, $max, $step, $default, $base, 0, $rollWidth);
     }
 
     public static function float(mixed $value): ?float
@@ -197,6 +205,17 @@ class DezimalSettingsReader implements ResetInterface
         }
 
         return (bool) $value;
+    }
+
+    private function productName(Entity $product): string
+    {
+        $translated = $product->get('translated');
+        $name = \is_array($translated) ? ($translated['name'] ?? null) : null;
+        if (!\is_string($name) || $name === '') {
+            $name = $product->get('name');
+        }
+
+        return \is_string($name) ? $name : '';
     }
 
     private function purchaseUnit(Entity $product): ?float

@@ -16,6 +16,19 @@
             this._total = this.el.querySelector('.nova-dezimal-total');
             this._value = this._form.querySelector('.js-nova-dezimal-value');
             this._quantity = this._form.querySelector('.js-quantity-selector');
+            this._running = this.el.querySelector('.nova-dezimal-running');
+
+            // Großer Preis oben = Gesamtpreis für den gewählten Wert; der Preis je Einheit steht klein darunter
+            const scope = this.el.closest('.product-detail-buy, .cms-element-buy-box, .product-detail, .modal-body') || document;
+            this._priceEl = this._opts.mode === 'menge' ? scope.querySelector('.product-detail-price') : null;
+            if (this._priceEl) {
+                this._unitPriceEl = document.createElement('p');
+                this._unitPriceEl.className = 'nova-dezimal-unit-price text-muted mb-1';
+                this._unitPriceEl.textContent = String(this._opts.labelUnitPrice || '%price% / %unit%')
+                    .replace('%price%', this._money(this._opts.price / (this._opts.basePriceValue || 1)))
+                    .replace('%unit%', this._opts.unit);
+                this._priceEl.insertAdjacentElement('afterend', this._unitPriceEl);
+            }
 
             if (this._value) {
                 this._value.addEventListener('input', () => this._update());
@@ -115,8 +128,27 @@
                 return;
             }
             const normalized = this._normalize(value);
-            this._total.textContent = (o.labelTotal || 'Total') + ': ' + this._money((o.price * normalized) / (o.basePriceValue || 1))
-                + ' (' + this._number(normalized, o.decimals || 0) + ' ' + o.unit + ')';
+            const total = (o.price * normalized) / (o.basePriceValue || 1);
+            const amount = this._number(normalized, o.decimals || 0) + ' ' + o.unit;
+
+            if (this._priceEl) {
+                this._priceEl.textContent = this._money(total);
+                this._total.textContent = amount + ' × ' + this._money(o.price / (o.basePriceValue || 1)) + ' / ' + o.unit;
+            } else {
+                this._total.textContent = (o.labelTotal || 'Total') + ': ' + this._money(total) + ' (' + amount + ')';
+            }
+
+            if (this._running) {
+                const unitIsArea = ['m²', 'm2', 'qm'].indexOf(o.unit) !== -1;
+                if (o.rollWidth > 0 && unitIsArea) {
+                    const metres = normalized / (o.rollWidth / 1000);
+                    this._running.textContent = String(o.labelRunning || '= %metres% m')
+                        .replace('%metres%', this._number(metres, 2))
+                        .replace('%width%', this._number(o.rollWidth, 0));
+                } else {
+                    this._running.textContent = '';
+                }
+            }
         }
     }
 

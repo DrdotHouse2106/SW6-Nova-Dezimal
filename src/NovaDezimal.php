@@ -54,6 +54,10 @@ class NovaDezimal extends Plugin
             'de' => 'Fläche je Stück (m²)', 'en' => 'Area per piece (m²)',
             'deHelp' => 'Nur bei „Festes Maß je Stück“, z. B. 1,5 für 1000 × 1500 mm. Leer = Verkaufseinheit des Artikels.',
             'enHelp' => 'Only for "fixed size per piece", e.g. 1.5 for 1000 × 1500 mm. Empty = product purchase unit.'],
+        Fields::FIELD_ROLL_WIDTH => ['id' => '0d3c1a5e9b7f4e21a6c8d4b2f0e1a930', 'type' => CustomFieldTypes::FLOAT,
+            'de' => 'Rollenbreite (mm)', 'en' => 'Roll width (mm)',
+            'deHelp' => 'Nur bei Rollenware in m²: zeigt „= x laufende Meter“. Leer = aus dem Artikelnamen („Rollenbreite 1500mm“, „RB 1500mm“).',
+            'enHelp' => 'Only for rolls sold in m²: shows "= x running metres". Empty = taken from the product name.'],
     ];
 
     private const ORDER_FIELDS = [

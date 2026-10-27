@@ -49,6 +49,7 @@ class DezimalCartProcessor implements CartProcessorInterface
 
             $product = $data->get('product-' . $lineItem->getReferencedId());
             if (!$product instanceof SalesChannelProductEntity) {
+                $this->note($lineItem, 'produktdaten-fehlen:' . get_debug_type($product));
                 continue;
             }
 
@@ -72,6 +73,17 @@ class DezimalCartProcessor implements CartProcessorInterface
         }
     }
 
+    /**
+     * Kurzer Status an der Position, falls sie nicht berechnet werden konnte (hilft bei der Fehlersuche).
+     */
+    private function note(LineItem $lineItem, string $status): void
+    {
+        $payload = $lineItem->getPayloadValue(DezimalPayload::KEY);
+        $payload = \is_array($payload) ? $payload : [];
+        $payload['status'] = $status;
+        $lineItem->setPayloadValue(DezimalPayload::KEY, $payload);
+    }
+
     private function aliasKey(SalesChannelContext $context): string
     {
         return trim($this->config->getString('NovaDezimal.config.payloadAlias', $context->getSalesChannelId()));
@@ -82,13 +94,15 @@ class DezimalCartProcessor implements CartProcessorInterface
         $price = $lineItem->getPrice();
         $unitPrice = $price !== null && $settings->pieceArea > 0 ? $price->getUnitPrice() / $settings->pieceArea : 0.0;
 
-        DezimalPayload::write($lineItem, $settings, $settings->pieceArea, $unitPrice, $this->aliasKey($context));
+        DezimalPayload::write($lineItem, $settings, $settings->pieceArea, $unitPrice, $this->aliasKey($context), $price?->getTotalPrice());
     }
 
     private function processAmount(LineItem $lineItem, DezimalSettings $settings, SalesChannelProductEntity $product, Cart $cart, SalesChannelContext $context): void
     {
         $definition = $lineItem->getPriceDefinition();
         if (!$definition instanceof QuantityPriceDefinition) {
+            $this->note($lineItem, 'keine-preisdefinition:' . get_debug_type($definition));
+
             return;
         }
 
@@ -107,14 +121,17 @@ class DezimalCartProcessor implements CartProcessorInterface
             $lineItem->setQuantity(1);
         }
 
-        $unitPrice = $this->unitPrice($product, $value, $definition->getPrice());
+        // Einheitspreis immer aus dem Produkt (nicht aus der Preisdefinition der Position), damit der Faktor
+        // nie doppelt angewendet wird – auch wenn die Definition bei einer Neuberechnung erhalten bleibt.
+        $unitPrice = $this->unitPrice($product, $value, $product->getCalculatedPrice()->getUnitPrice());
         $calculatedDefinition = new QuantityPriceDefinition(
             $unitPrice * $value / $settings->basePriceValue,
             $definition->getTaxRules(),
             1
         );
-        if ($definition->getListPrice() !== null) {
-            $calculatedDefinition->setListPrice($definition->getListPrice() * $value / $settings->basePriceValue);
+        $listPrice = $product->getCalculatedPrice()->getListPrice();
+        if ($listPrice !== null) {
+            $calculatedDefinition->setListPrice($listPrice->getPrice() * $value / $settings->basePriceValue);
         }
         // Grundpreis „je m²“ bleibt korrekt: Inhalt der Position = eingegebener Wert
         $calculatedDefinition->setReferencePriceDefinition(new ReferencePriceDefinition(
@@ -123,6 +140,9 @@ class DezimalCartProcessor implements CartProcessorInterface
             $settings->unit
         ));
 
+        // Definition UND Preis setzen: rechnet später irgendetwas die Position aus ihrer Definition neu,
+        // bleibt der Dezimalpreis erhalten
+        $lineItem->setPriceDefinition($calculatedDefinition);
         $lineItem->setPrice($this->calculator->calculate($calculatedDefinition, $context));
 
         $delivery = $lineItem->getDeliveryInformation();
@@ -131,7 +151,7 @@ class DezimalCartProcessor implements CartProcessorInterface
             $delivery->setWeight(round($weight * $value / $settings->basePriceValue, 3));
         }
 
-        DezimalPayload::write($lineItem, $settings, $value, $unitPrice / $settings->basePriceValue, $this->aliasKey($context));
+        DezimalPayload::write($lineItem, $settings, $value, $unitPrice / $settings->basePriceValue, $this->aliasKey($context), $lineItem->getPrice()?->getTotalPrice());
     }
 
     /**

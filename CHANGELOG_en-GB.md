@@ -1,3 +1,8 @@
+# 1.0.2
+- Cart: position price is also set as price definition; status on the position for troubleshooting
+- Product page: the main price shows the total for the chosen value
+- New: "= x running metres" for rolls sold in m²
+
 # 1.0.1
 - New settings "field mapping", "additional payload key" and "not together with plugin" to reuse existing custom fields and mail templates
 

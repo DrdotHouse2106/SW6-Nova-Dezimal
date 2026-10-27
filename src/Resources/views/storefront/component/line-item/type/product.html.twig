@@ -2,6 +2,7 @@
 
 {% block component_line_item_type_product_col_quantity %}
     {% set novaDezimal = lineItem.payload.novaDezimal ?? null %}
+    {% if novaDezimal %}<!-- nova-dezimal {{ novaDezimal|json_encode }} gesamt={{ lineItem.price.totalPrice ?? '' }} definition={{ lineItem.priceDefinition.price ?? '' }} -->{% endif %}
     {% if novaDezimal and (novaDezimal.modus ?? '') == 'menge' %}
         <div class="line-item-quantity">
             {% sw_include '@NovaDezimal/storefront/nova-dezimal/line-item-value.html.twig' with { novaDezimal: novaDezimal } %}

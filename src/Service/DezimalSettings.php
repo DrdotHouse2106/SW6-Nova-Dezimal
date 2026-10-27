@@ -24,6 +24,7 @@ final class DezimalSettings
         public readonly float $default,
         public readonly float $basePriceValue,
         public readonly float $pieceArea,
+        public readonly float $rollWidth = 0,
     ) {
     }
 
@@ -59,6 +60,18 @@ final class DezimalSettings
         return round($value, 4);
     }
 
+    /**
+     * Laufende Meter bei Rollenware in m² (Wert ÷ Rollenbreite); 0, wenn keine Rollenbreite bekannt ist.
+     */
+    public function runningMetres(float $value): float
+    {
+        if ($this->rollWidth <= 0 || !\in_array($this->unit, ['m²', 'm2', 'qm'], true)) {
+            return 0.0;
+        }
+
+        return round($value / ($this->rollWidth / 1000), 2);
+    }
+
     public function decimals(): int
     {
         $step = rtrim(rtrim(number_format($this->step, 4, '.', ''), '0'), '.');
@@ -84,6 +97,7 @@ final class DezimalSettings
             'default' => $this->default,
             'basePriceValue' => $this->basePriceValue,
             'pieceArea' => $this->pieceArea,
+            'rollWidth' => $this->rollWidth,
             'decimals' => $this->decimals(),
         ];
     }

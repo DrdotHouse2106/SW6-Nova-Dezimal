@@ -1,3 +1,9 @@
+# 1.0.2
+- Warenkorb: Preis der Position wird zusätzlich als Preisdefinition gesetzt (Wert × Einheitspreis bleibt bei jeder Neuberechnung erhalten), Status zur Fehlersuche an der Position
+- Produktseite: der große Preis zeigt den Gesamtpreis für den gewählten Wert, der Preis je Einheit steht klein darunter
+- Neu: „= x laufende Meter“ bei Rollenware in m² (Rollenbreite aus Feld, Feldzuordnung oder Artikelname)
+- Warenkorb: unter dem Wert „× Preis / Einheit“ und laufende Meter
+
 # 1.0.1
 - Neue Einstellungen „Feldzuordnung“, „Zusätzlicher Payload-Schlüssel“ und „Nicht gleichzeitig mit Plugin“: vorhandene Zusatzfelder und Mail-Vorlagen weiter nutzen, ohne feste Namen im Code
 

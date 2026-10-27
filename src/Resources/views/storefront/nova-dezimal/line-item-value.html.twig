@@ -33,5 +33,18 @@
         {% else %}
             <span class="nova-dezimal-line-value">{{ value|number_format(2, ',', '.') }} {{ unit }}</span>
         {% endif %}
+        {% if novaDezimal.preisJeEinheit is defined and novaDezimal.preisJeEinheit %}
+            <div class="nova-dezimal-line-unit small text-muted">
+                × {{ novaDezimal.preisJeEinheit|currency }} / {{ unit }}
+            </div>
+        {% endif %}
+        {% if novaDezimal.laufmeter is defined and novaDezimal.laufmeter %}
+            <div class="nova-dezimal-line-running small">
+                {{ 'novaDezimal.runningMetres'|trans({
+                    '%metres%': novaDezimal.laufmeter|number_format(2, ',', '.'),
+                    '%width%': novaDezimal.rollenbreite|number_format(0, ',', '.')
+                })|sw_sanitize }}
+            </div>
+        {% endif %}
     </div>
 </div>

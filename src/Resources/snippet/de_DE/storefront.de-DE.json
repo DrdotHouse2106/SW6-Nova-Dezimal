@@ -5,7 +5,10 @@
         "range": "Bestellbar von %min% bis %max% %unit% in Schritten von %step% %unit%.",
         "pieceArea": "1 Stück = %area% %unit%. Der Preis gilt pro Stück.",
         "total": "Gesamt",
-        "piecesTotal": "%pieces% Stück = %amount% %unit%"
+        "piecesTotal": "%pieces% Stück = %amount% %unit%",
+        "unitPrice": "%price% / %unit%",
+        "runningMetres": "= %metres% laufende Meter (Rollenbreite %width% mm)",
+        "totalFor": "Gesamtpreis für %amount% %unit%"
     },
     "checkout": {
         "nova-dezimal-value-adjusted": "Die Menge von „%name%“ wurde auf %value% %unit% angepasst (Mindest-, Höchstwert oder Schrittweite)."
