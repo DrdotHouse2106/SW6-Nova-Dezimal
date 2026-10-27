@@ -3,7 +3,7 @@
 # Ablauf: Version in composer.json erhöhen (z. B. 1.0.0 → 1.1.0), Eintrag „# 1.1.0“ im Changelog
 # ergänzen, auf main pushen. Die Action erstellt dann den Tag v1.1.0, ein Release mit den
 # Changelog-Notizen und hängt das fertige ZIP für „Erweiterung hochladen“ an.
-# Gibt es den Tag schon, passiert nichts. Manuell starten: Actions → Release → Run workflow.
+# Gibt es den Tag schon, passiert nichts (zum Neubauen Release und Tag vorher löschen). Manuell starten: Actions → Release → Run workflow.
 name: Release
 
 on:
