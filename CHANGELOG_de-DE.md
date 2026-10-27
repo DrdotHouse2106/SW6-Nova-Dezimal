@@ -1,3 +1,6 @@
+# 1.0.7
+- Produktseite: Eingabefeld genau so hoch wie der Kaufen-Button
+
 # 1.0.6
 - Produktseite: Eingabefeld als eine Einheit mit durchgehendem Rahmen (−  1,50 m²  +), keine abgeschnittenen Ecken mehr bei abgerundeten Mengenfeldern im Theme
 

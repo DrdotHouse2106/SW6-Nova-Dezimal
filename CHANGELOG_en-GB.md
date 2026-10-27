@@ -1,3 +1,6 @@
+# 1.0.7
+- Product page: input exactly as tall as the buy button
+
 # 1.0.6
 - Product page: input as one unit with a single border, no more clipped corners with rounded quantity fields in the theme
 

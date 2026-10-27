@@ -1,11 +1,11 @@
 {# Eingabe des Wertes (z. B. 2,35 m²) statt der Stückzahl – die Position hat immer Menge 1 #}
 {% set decimals = novaDezimal.decimals %}
-{# Ein gemeinsamer Rahmen um die ganze Gruppe, die Teile selbst ohne Rahmen – sonst schneidet eine
+{# Die Gruppe streckt sich auf die Höhe des Kaufen-Buttons in derselben Zeile. Ein gemeinsamer Rahmen um die ganze Gruppe, die Teile selbst ohne Rahmen – sonst schneidet eine
    abgerundete Gruppe (z. B. Pillenform im Theme) die Ecken der einzelnen Rahmen ab #}
 <style>
-    .nova-dezimal-group { flex-wrap: nowrap; align-items: stretch; border: 1px solid var(--nova-border, var(--bs-border-color, #dee2e6)); border-radius: 999px; overflow: hidden; background: var(--bs-body-bg, #fff); }
+    .nova-dezimal-group { flex-wrap: nowrap; align-items: stretch; border: 1px solid var(--nova-border, var(--bs-border-color, #dee2e6)); border-radius: 999px; overflow: hidden; background: var(--bs-body-bg, #fff); min-height: 44px; }
     .nova-dezimal-group:focus-within { border-color: var(--bs-primary, #0d6efd); box-shadow: 0 0 0 .2rem rgba(var(--bs-primary-rgb, 13, 110, 253), .2); }
-    .nova-dezimal-group > .btn, .nova-dezimal-group > .form-control, .nova-dezimal-group > .input-group-text { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+    .nova-dezimal-group > .btn, .nova-dezimal-group > .form-control, .nova-dezimal-group > .input-group-text { border: 0; border-radius: 0; background: transparent; box-shadow: none; height: auto; min-height: 0; padding-block: 0; }
     .nova-dezimal-group > .btn { min-width: 2.25rem; padding-inline: .5rem; }
     .nova-dezimal-group > .btn:hover { background: var(--bs-tertiary-bg, #f8f9fa); }
     .nova-dezimal-group > .form-control { min-width: 3rem; padding-inline: .25rem; text-align: right; }
