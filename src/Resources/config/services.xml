@@ -21,7 +21,11 @@
             <argument type="service" id="Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator"/>
             <argument type="service" id="Nova\Dezimal\Service\DezimalSettingsReader"/>
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <call method="setProductRepository">
+                <argument type="service" id="sales_channel.product.repository"/>
+            </call>
             <tag name="shopware.cart.processor" priority="4950"/>
+            <tag name="shopware.cart.collector" priority="4950"/>
         </service>
 
         <!-- Platten: Preis pro m² × Fläche je Stück, überall wo Produktpreise berechnet werden -->

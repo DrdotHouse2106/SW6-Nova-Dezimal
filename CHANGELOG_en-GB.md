@@ -1,3 +1,6 @@
+# 1.0.3
+- Cart: product data for decimal positions is loaded when missing, so validation and price run on every calculation
+
 # 1.0.2
 - Cart: position price is also set as price definition; status on the position for troubleshooting
 - Product page: the main price shows the total for the chosen value

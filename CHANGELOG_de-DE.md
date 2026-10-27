@@ -1,3 +1,6 @@
+# 1.0.3
+- Warenkorb: Produktdaten für Dezimal-Positionen werden beim erneuten Laden selbst nachgeladen – Prüfung von Min/Max/Schritt und Preis laufen damit bei jeder Berechnung (vorher nur beim Hinzufügen)
+
 # 1.0.2
 - Warenkorb: Preis der Position wird zusätzlich als Preisdefinition gesetzt (Wert × Einheitspreis bleibt bei jeder Neuberechnung erhalten), Status zur Fehlersuche an der Position
 - Produktseite: der große Preis zeigt den Gesamtpreis für den gewählten Wert, der Preis je Einheit steht klein darunter

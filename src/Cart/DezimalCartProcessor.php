@@ -7,6 +7,7 @@ use Nova\Dezimal\Service\DezimalSettings;
 use Nova\Dezimal\Service\DezimalSettingsReader;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\CartBehavior;
+use Shopware\Core\Checkout\Cart\CartDataCollectorInterface;
 use Shopware\Core\Checkout\Cart\CartProcessorInterface;
 use Shopware\Core\Checkout\Cart\Delivery\Struct\DeliveryInformation;
 use Shopware\Core\Checkout\Cart\LineItem\CartDataCollection;
@@ -15,6 +16,8 @@ use Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator;
 use Shopware\Core\Checkout\Cart\Price\Struct\QuantityPriceDefinition;
 use Shopware\Core\Checkout\Cart\Price\Struct\ReferencePriceDefinition;
 use Shopware\Core\Content\Product\SalesChannel\SalesChannelProductEntity;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\System\SalesChannel\Entity\SalesChannelRepository;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
@@ -27,13 +30,60 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
  * Modus „stueck“: der Stückpreis kommt bereits richtig aus dem Produkt (siehe PieceAreaPriceCalculator),
  * hier wird nur die Fläche in den Payload geschrieben.
  */
-class DezimalCartProcessor implements CartProcessorInterface
+class DezimalCartProcessor implements CartDataCollectorInterface, CartProcessorInterface
 {
+    private const DATA_KEY = 'nova-dezimal-product-';
+
+    /** @var SalesChannelRepository<\Shopware\Core\Content\Product\ProductCollection>|null */
+    private ?SalesChannelRepository $productRepository = null;
+
     public function __construct(
         private readonly QuantityPriceCalculator $calculator,
         private readonly DezimalSettingsReader $settingsReader,
         private readonly SystemConfigService $config,
     ) {
+    }
+
+    /**
+     * Setter statt Konstruktor-Argument: ein Update mit noch altem kompiliertem Container führt so nie zu einem Fehler 500.
+     *
+     * @param SalesChannelRepository<\Shopware\Core\Content\Product\ProductCollection> $productRepository
+     */
+    public function setProductRepository(SalesChannelRepository $productRepository): void
+    {
+        $this->productRepository = $productRepository;
+    }
+
+    /**
+     * Shopware lädt Produktdaten nur für neue/geänderte Positionen. Beim erneuten Laden des Warenkorbs fehlen sie –
+     * für Dezimal-Positionen werden sie hier nachgeladen, damit Preis und Prüfung immer laufen.
+     */
+    public function collect(CartDataCollection $data, Cart $original, SalesChannelContext $context, CartBehavior $behavior): void
+    {
+        if ($this->productRepository === null || !$this->config->getBool('NovaDezimal.config.active', $context->getSalesChannelId())) {
+            return;
+        }
+
+        $missing = [];
+        foreach ($original->getLineItems()->filterType(LineItem::PRODUCT_LINE_ITEM_TYPE) as $lineItem) {
+            $id = $lineItem->getReferencedId();
+            if ($id === null || !DezimalPayload::has($lineItem)) {
+                continue;
+            }
+            if (!$data->get('product-' . $id) instanceof SalesChannelProductEntity && !$data->has(self::DATA_KEY . $id)) {
+                $missing[$id] = $id;
+            }
+        }
+
+        if ($missing === []) {
+            return;
+        }
+
+        $criteria = new Criteria(array_values($missing));
+        $criteria->setTitle('nova-dezimal::cart-products');
+        foreach ($this->productRepository->search($criteria, $context)->getEntities() as $product) {
+            $data->set(self::DATA_KEY . $product->getId(), $product);
+        }
     }
 
     public function process(CartDataCollection $data, Cart $original, Cart $toCalculate, SalesChannelContext $context, CartBehavior $behavior): void
@@ -48,6 +98,9 @@ class DezimalCartProcessor implements CartProcessorInterface
             }
 
             $product = $data->get('product-' . $lineItem->getReferencedId());
+            if (!$product instanceof SalesChannelProductEntity) {
+                $product = $data->get(self::DATA_KEY . $lineItem->getReferencedId());
+            }
             if (!$product instanceof SalesChannelProductEntity) {
                 $this->note($lineItem, 'produktdaten-fehlen:' . get_debug_type($product));
                 continue;
