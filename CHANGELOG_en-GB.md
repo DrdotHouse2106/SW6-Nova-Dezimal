@@ -1,3 +1,6 @@
+# 1.0.6
+- Product page: input as one unit with a single border, no more clipped corners with rounded quantity fields in the theme
+
 # 1.0.5
 - Off-canvas cart: value can now be changed directly (Enter or "Apply", no page reload)
 - Cart page: "Apply" is a separate button below the input instead of squeezed next to it

@@ -1,3 +1,6 @@
+# 1.0.6
+- Produktseite: Eingabefeld als eine Einheit mit durchgehendem Rahmen (−  1,50 m²  +), keine abgeschnittenen Ecken mehr bei abgerundeten Mengenfeldern im Theme
+
 # 1.0.5
 - Seiten-Warenkorb (Off-Canvas): Wert lässt sich jetzt direkt ändern (Enter oder „Übernehmen“, ohne Neuladen der Seite)
 - Warenkorbseite: „Übernehmen“ steht als eigener Button unter dem Eingabefeld statt eingequetscht daneben
