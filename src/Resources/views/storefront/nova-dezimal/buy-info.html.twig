@@ -1,0 +1,42 @@
+{# Hinweis unter dem Kaufen-Button: erlaubte Werte bzw. Fläche je Stück und Live-Gesamtpreis (nova-dezimal.js) #}
+{% set price = product.calculatedPrice.unitPrice %}
+{% if product.calculatedPrices|length > 0 %}
+    {% set price = product.calculatedPrices.first.unitPrice %}
+{% endif %}
+{% set options = {
+    mode: novaDezimal.mode,
+    min: novaDezimal.min,
+    max: novaDezimal.max,
+    step: novaDezimal.step,
+    decimals: novaDezimal.decimals,
+    unit: novaDezimal.unit,
+    price: price,
+    basePriceValue: novaDezimal.basePriceValue,
+    pieceArea: novaDezimal.pieceArea,
+    locale: app.request.locale|default('de-DE')|replace({'_': '-'}),
+    currency: context.currency.isoCode,
+    labelTotal: 'novaDezimal.total'|trans|striptags,
+    labelPieces: 'novaDezimal.piecesTotal'|trans|striptags
+} %}
+<div class="nova-dezimal-info small text-muted mt-2"
+     data-nova-dezimal="true"
+     data-nova-dezimal-options="{{ options|json_encode|e('html_attr') }}">
+    {% if novaDezimal.mode == 'menge' %}
+        <div>
+            {{ 'novaDezimal.range'|trans({
+                '%min%': novaDezimal.min|number_format(novaDezimal.decimals, ',', '.'),
+                '%max%': novaDezimal.max|number_format(novaDezimal.decimals, ',', '.'),
+                '%step%': novaDezimal.step|number_format(novaDezimal.decimals, ',', '.'),
+                '%unit%': novaDezimal.unit
+            })|sw_sanitize }}
+        </div>
+    {% else %}
+        <div>
+            {{ 'novaDezimal.pieceArea'|trans({
+                '%area%': novaDezimal.pieceArea|number_format(2, ',', '.'),
+                '%unit%': novaDezimal.unit
+            })|sw_sanitize }}
+        </div>
+    {% endif %}
+    <div class="nova-dezimal-total fw-semibold text-body" aria-live="polite"></div>
+</div>

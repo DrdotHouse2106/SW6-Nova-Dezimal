@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="Nova\Dezimal\Service\DezimalSettingsReader">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <tag name="kernel.reset" method="reset"/>
+        </service>
+
+        <service id="Nova\Dezimal\Subscriber\LineItemAddedSubscriber">
+            <argument type="service" id="sales_channel.product.repository"/>
+            <argument type="service" id="Nova\Dezimal\Service\DezimalSettingsReader"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- nach Shopwares Produkt-Prozessor (5000), vor den Aktionen (4900) -->
+        <service id="Nova\Dezimal\Cart\DezimalCartProcessor">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator"/>
+            <argument type="service" id="Nova\Dezimal\Service\DezimalSettingsReader"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <tag name="shopware.cart.processor" priority="4950"/>
+        </service>
+
+        <!-- Platten: Preis pro m² × Fläche je Stück, überall wo Produktpreise berechnet werden -->
+        <service id="Nova\Dezimal\Price\PieceAreaPriceCalculator"
+                 decorates="Shopware\Core\Content\Product\SalesChannel\Price\ProductPriceCalculator">
+            <argument type="service" id="Nova\Dezimal\Price\PieceAreaPriceCalculator.inner"/>
+            <argument type="service" id="Nova\Dezimal\Service\DezimalSettingsReader"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <service id="Nova\Dezimal\Subscriber\ProductPageSubscriber">
+            <argument type="service" id="Nova\Dezimal\Service\DezimalSettingsReader"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Nova\Dezimal\Controller\DezimalCartController" public="true">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <!-- weclapp -->
+        <service id="Nova\Dezimal\Weclapp\WeclappClient">
+            <argument type="service" id="http_client"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <service id="Nova\Dezimal\Weclapp\WeclappOrderCorrector">
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="Nova\Dezimal\Weclapp\WeclappClient"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service id="Nova\Dezimal\ScheduledTask\WeclappCorrectionTask">
+            <tag name="shopware.scheduled.task"/>
+        </service>
+
+        <service id="Nova\Dezimal\ScheduledTask\WeclappCorrectionTaskHandler">
+            <argument type="service" id="scheduled_task.repository"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="Nova\Dezimal\Weclapp\WeclappOrderCorrector"/>
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <service id="Nova\Dezimal\Command\WeclappCorrectCommand">
+            <argument type="service" id="Nova\Dezimal\Weclapp\WeclappOrderCorrector"/>
+            <tag name="console.command"/>
+        </service>
+    </services>
+</container>

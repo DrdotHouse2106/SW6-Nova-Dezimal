@@ -1,0 +1,38 @@
+{% sw_extends '@Storefront/storefront/component/line-item/type/product.html.twig' %}
+
+{% block component_line_item_type_product_col_quantity %}
+    {% set novaDezimal = lineItem.payload.novaDezimal ?? null %}
+    {% if novaDezimal and (novaDezimal.modus ?? '') == 'menge' %}
+        <div class="line-item-quantity">
+            {% sw_include '@NovaDezimal/storefront/nova-dezimal/line-item-value.html.twig' with { novaDezimal: novaDezimal } %}
+        </div>
+    {% else %}
+        {{ parent() }}
+        {% if novaDezimal and (novaDezimal.modus ?? '') == 'stueck' and novaDezimal.gesamtmenge is defined %}
+            <div class="nova-dezimal-line-amount small text-muted">
+                = {{ novaDezimal.gesamtmenge|number_format(2, ',', '.') }} {{ novaDezimal.einheit }}
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block component_line_item_type_product_col_unit_price %}
+    {% set novaDezimal = lineItem.payload.novaDezimal ?? null %}
+    {% if novaDezimal and novaDezimal.preisJeEinheit is defined and novaDezimal.einheit is defined %}
+        <div class="line-item-unit-price is-shown">
+            <div class="line-item-unit-price-label">
+                {{ 'checkout.cartHeaderUnitPrice'|trans|sw_sanitize }}:
+            </div>
+            <div class="line-item-unit-price-value">
+                {% if displayMode == 'order' and order is defined and order %}
+                    {{ novaDezimal.preisJeEinheit|currency(order.currency.isoCode) }}
+                {% else %}
+                    {{ novaDezimal.preisJeEinheit|currency }}
+                {% endif %}
+                <span class="line-item-unit-price-value-descriptor"> / {{ novaDezimal.einheit }}</span>
+            </div>
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

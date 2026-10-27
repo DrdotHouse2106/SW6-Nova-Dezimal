@@ -1,0 +1,18 @@
+{% sw_extends '@Storefront/storefront/component/buy-widget/buy-widget-form.html.twig' %}
+
+{% block buy_widget_buy_quantity_container %}
+    {% set novaDezimal = product.extensions.novaDezimal ?? null %}
+    {% if novaDezimal and novaDezimal.mode == 'menge' %}
+        {% sw_include '@NovaDezimal/storefront/nova-dezimal/buy-input.html.twig' with { product: product, novaDezimal: novaDezimal } %}
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block buy_widget_buy_container %}
+    {{ parent() }}
+    {% set novaDezimal = product.extensions.novaDezimal ?? null %}
+    {% if novaDezimal and buyable is defined and buyable %}
+        {% sw_include '@NovaDezimal/storefront/nova-dezimal/buy-info.html.twig' with { product: product, novaDezimal: novaDezimal } %}
+    {% endif %}
+{% endblock %}

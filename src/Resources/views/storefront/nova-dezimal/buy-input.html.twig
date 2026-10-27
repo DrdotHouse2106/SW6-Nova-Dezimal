@@ -1,0 +1,24 @@
+{# Eingabe des Wertes (z. B. 2,35 m²) statt der Stückzahl – die Position hat immer Menge 1 #}
+{% set decimals = novaDezimal.decimals %}
+<fieldset class="col-4 d-flex justify-content-end nova-dezimal-input">
+    <legend class="form-label visually-hidden">
+        {{ (novaDezimal.label ?: 'novaDezimal.value'|trans)|striptags }} ({{ novaDezimal.unit }})
+    </legend>
+    <input type="hidden" name="lineItems[{{ product.id }}][quantity]" value="1">
+    <div class="input-group quantity-selector-group nova-dezimal-group">
+        <button type="button" class="btn btn-outline-light btn-minus js-nova-dezimal-minus" aria-label="{{ 'component.product.quantitySelect.decrease'|trans|striptags }}">
+            {% sw_icon 'minus' style {size: 'xs'} %}
+        </button>
+        <input type="text"
+               inputmode="decimal"
+               autocomplete="off"
+               name="lineItems[{{ product.id }}][payload][novaDezimal][wert]"
+               class="form-control quantity-selector-group-input js-nova-dezimal-value"
+               value="{{ novaDezimal.default|number_format(decimals, ',', '') }}"
+               aria-label="{{ (novaDezimal.label ?: 'novaDezimal.value'|trans)|striptags }} ({{ novaDezimal.unit }})">
+        <button type="button" class="btn btn-outline-light btn-plus js-nova-dezimal-plus" aria-label="{{ 'component.product.quantitySelect.increase'|trans|striptags }}">
+            {% sw_icon 'plus' style {size: 'xs'} %}
+        </button>
+        <span class="input-group-text">{{ novaDezimal.unit }}</span>
+    </div>
+</fieldset>

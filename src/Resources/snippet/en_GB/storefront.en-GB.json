@@ -1,0 +1,13 @@
+{
+    "novaDezimal": {
+        "value": "Amount",
+        "apply": "Apply",
+        "range": "Available from %min% to %max% %unit% in steps of %step% %unit%.",
+        "pieceArea": "1 piece = %area% %unit%. The price is per piece.",
+        "total": "Total",
+        "piecesTotal": "%pieces% pieces = %amount% %unit%"
+    },
+    "checkout": {
+        "nova-dezimal-value-adjusted": "The amount of \"%name%\" was changed to %value% %unit% (minimum, maximum or step)."
+    }
+}

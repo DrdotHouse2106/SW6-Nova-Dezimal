@@ -1,0 +1,32 @@
+{
+    "name": "nova/nova-dezimal",
+    "description": "Artikel mit Dezimalmenge verkaufen (z. B. Meter oder Quadratmeter) und Platten mit festem Maß pro Stück – mit optionaler Mengenkorrektur im ERP",
+    "type": "shopware-platform-plugin",
+    "version": "1.0.1",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nova"
+        }
+    ],
+    "require": {
+        "shopware/core": "~6.6.0 || ~6.7.0",
+        "shopware/storefront": "~6.6.0 || ~6.7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nova\\Dezimal\\": "src/"
+        }
+    },
+    "extra": {
+        "shopware-plugin-class": "Nova\\Dezimal\\NovaDezimal",
+        "label": {
+            "de-DE": "Nova Dezimal",
+            "en-GB": "Nova Decimal"
+        },
+        "description": {
+            "de-DE": "Verkauf nach Meter, Quadratmeter oder anderer Einheit mit Dezimalwert (z. B. 2,35 m²) – Preis = Wert × Einheitspreis. Platten mit festem Maß: Preis pro m² × Fläche je Stück. Optional: Menge und Einzelpreis im weclapp-Auftrag automatisch korrigieren.",
+            "en-GB": "Sell by metre, square metre or any unit with a decimal value (e.g. 2.35 m²) – price = value × unit price. Boards with a fixed size: price per m² × area per piece. Optional: correct quantity and unit price in the weclapp sales order automatically."
+        }
+    }
+}

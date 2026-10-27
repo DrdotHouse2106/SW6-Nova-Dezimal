@@ -1,0 +1,16 @@
+{% sw_extends '@Storefront/storefront/component/product/card/action.html.twig' %}
+
+{# Bei freier Menge muss der Wert auf der Produktseite gewählt werden – in Listen „Details“ statt „In den Warenkorb“ #}
+{% block component_product_box_action_buttons %}
+    {% set novaDezimal = product.extensions.novaDezimal ?? null %}
+    {% if novaDezimal and novaDezimal.mode == 'menge' %}
+        <div class="d-grid">
+            <a href="{{ seoUrl('frontend.detail.page', {productId: product.id}) }}"
+               class="btn btn-light btn-detail">
+                {{ 'listing.boxProductDetails'|trans|sw_sanitize }}
+            </a>
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

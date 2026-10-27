@@ -1,0 +1,13 @@
+{
+    "novaDezimal": {
+        "value": "Menge",
+        "apply": "Übernehmen",
+        "range": "Bestellbar von %min% bis %max% %unit% in Schritten von %step% %unit%.",
+        "pieceArea": "1 Stück = %area% %unit%. Der Preis gilt pro Stück.",
+        "total": "Gesamt",
+        "piecesTotal": "%pieces% Stück = %amount% %unit%"
+    },
+    "checkout": {
+        "nova-dezimal-value-adjusted": "Die Menge von „%name%“ wurde auf %value% %unit% angepasst (Mindest-, Höchstwert oder Schrittweite)."
+    }
+}

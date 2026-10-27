@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+    <card>
+        <title>General</title>
+        <title lang="de-DE">Allgemein</title>
+
+        <input-field type="bool">
+            <name>active</name>
+            <label>Active</label>
+            <label lang="de-DE">Aktiv</label>
+            <defaultValue>true</defaultValue>
+            <helpText>Sell decimal products in this sales channel.</helpText>
+            <helpText lang="de-DE">Dezimal-Artikel in diesem Verkaufskanal verkaufen. Achtung: Bei Platten („Festes Maß je Stück“) gilt ohne Nova Dezimal der m²-Preis als Stückpreis.</helpText>
+        </input-field>
+
+        <input-field type="bool">
+            <name>cartEdit</name>
+            <label>Change value in the cart</label>
+            <label lang="de-DE">Wert im Warenkorb änderbar</label>
+            <defaultValue>true</defaultValue>
+            <helpText lang="de-DE">Im Warenkorb erscheint ein Eingabefeld (z. B. 2,35 m²) mit „Übernehmen“.</helpText>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Existing data (optional)</title>
+        <title lang="de-DE">Vorhandene Daten (optional)</title>
+
+        <input-field type="textarea">
+            <name>fieldMap</name>
+            <label>Field mapping</label>
+            <label lang="de-DE">Feldzuordnung</label>
+            <helpText>Use existing product custom fields as a second source, one per line: key=custom_field. Keys: aktiv, einheit, bezeichnung, min, max, schritt, vorgabe, preisJe. The own fields (Nova Decimal) take precedence.</helpText>
+            <helpText lang="de-DE">Vorhandene Produkt-Zusatzfelder als zweite Quelle nutzen (z. B. wenn ein ERP die Werte schon in eigene Felder schreibt), je Zeile „schlüssel=zusatzfeld“. Schlüssel: aktiv, einheit, bezeichnung, min, max, schritt, vorgabe, preisJe. Die eigenen Felder (Nova Dezimal) haben Vorrang.</helpText>
+        </input-field>
+
+        <input-field type="text">
+            <name>payloadAlias</name>
+            <label>Additional payload key</label>
+            <label lang="de-DE">Zusätzlicher Payload-Schlüssel</label>
+            <helpText lang="de-DE">Schreibt den Wert zusätzlich als dimensions-Liste unter diesem Schlüssel in die Position (für vorhandene Mail-Vorlagen). Leer = nur „novaDezimal“.</helpText>
+        </input-field>
+
+        <input-field type="text">
+            <name>exclusiveWith</name>
+            <label>Not together with plugin</label>
+            <label lang="de-DE">Nicht gleichzeitig mit Plugin</label>
+            <helpText lang="de-DE">Technischer Name eines anderen Plugins (kommagetrennt). Ist es aktiv, hält sich Nova Dezimal komplett heraus – für einen sicheren Wechsel.</helpText>
+        </input-field>
+    </card>
+
+    <card>
+        <title>weclapp: correct quantity and unit price</title>
+        <title lang="de-DE">weclapp: Menge und Einzelpreis korrigieren</title>
+
+        <input-field type="bool">
+            <name>weclappEnabled</name>
+            <label>Correct sales orders in weclapp</label>
+            <label lang="de-DE">Aufträge in weclapp korrigieren</label>
+            <defaultValue>false</defaultValue>
+            <helpText lang="de-DE">weclapp übernimmt aus Shopware nur ganze Mengen (1 × Gesamtpreis bzw. Stück × Plattenpreis). Alle 10 Minuten setzt Nova Dezimal die Position im weclapp-Auftrag auf die echte Menge (z. B. 2,35 m² bzw. 2 Platten × 1,5 m² = 3 m²) und rechnet den Einzelpreis so um, dass der Betrag gleich bleibt. Ergebnis steht an der Bestellung (Zusatzfelder „weclapp-Korrektur“).</helpText>
+        </input-field>
+
+        <input-field type="bool">
+            <name>weclappDryRun</name>
+            <label>Test mode (only log)</label>
+            <label lang="de-DE">Testmodus (nur protokollieren)</label>
+            <defaultValue>true</defaultValue>
+            <helpText lang="de-DE">An: In weclapp wird nichts geändert. An der Bestellung steht „test“ und was geändert würde. Erst ausschalten, wenn die Testeinträge stimmen – die Test-Bestellungen werden dann automatisch richtig korrigiert.</helpText>
+        </input-field>
+
+        <input-field type="text">
+            <name>weclappUrl</name>
+            <label>weclapp address</label>
+            <label lang="de-DE">weclapp-Adresse</label>
+            <placeholder>https://firma.weclapp.com</placeholder>
+        </input-field>
+
+        <input-field type="password">
+            <name>weclappToken</name>
+            <label>weclapp API token</label>
+            <label lang="de-DE">weclapp-API-Token</label>
+            <helpText lang="de-DE">weclapp → Mein Profil → API-Token. Der Benutzer braucht das Recht, Aufträge zu bearbeiten.</helpText>
+        </input-field>
+
+        <input-field type="text">
+            <name>weclappSince</name>
+            <label>Only orders from</label>
+            <label lang="de-DE">Nur Bestellungen ab</label>
+            <helpText lang="de-DE">Datum/Uhrzeit (JJJJ-MM-TT HH:MM). Wird beim Aktivieren automatisch gesetzt – ältere, von Hand korrigierte Aufträge werden nie angefasst.</helpText>
+        </input-field>
+
+        <input-field type="int">
+            <name>weclappDays</name>
+            <label>Look back (days)</label>
+            <label lang="de-DE">Zeitraum (Tage)</label>
+            <defaultValue>14</defaultValue>
+            <helpText lang="de-DE">So lange wird nach einem Auftrag gesucht, der noch nicht in weclapp angekommen ist.</helpText>
+        </input-field>
+
+        <input-field type="text">
+            <name>weclappStatuses</name>
+            <label>Allowed weclapp status</label>
+            <label lang="de-DE">Erlaubte weclapp-Status</label>
+            <defaultValue>ORDER_ENTRY_IN_PROGRESS,ORDER_CONFIRMATION_PRINTED</defaultValue>
+            <helpText lang="de-DE">Nur Aufträge in diesen Status werden geändert (kommagetrennt). Bereits gelieferte oder berechnete Aufträge bleiben unverändert und werden an der Bestellung als „uebersprungen“ markiert.</helpText>
+        </input-field>
+
+        <input-field type="int">
+            <name>weclappPriceDecimals</name>
+            <label>Decimal places of the unit price</label>
+            <label lang="de-DE">Nachkommastellen Einzelpreis</label>
+            <defaultValue>4</defaultValue>
+            <helpText lang="de-DE">Der umgerechnete Einzelpreis wird so genau gespeichert, damit der Positionsbetrag auf den Cent stimmt.</helpText>
+        </input-field>
+    </card>
+</config>
