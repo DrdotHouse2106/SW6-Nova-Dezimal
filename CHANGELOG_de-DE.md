@@ -1,3 +1,7 @@
+# 1.0.5
+- Seiten-Warenkorb (Off-Canvas): Wert lässt sich jetzt direkt ändern (Enter oder „Übernehmen“, ohne Neuladen der Seite)
+- Warenkorbseite: „Übernehmen“ steht als eigener Button unter dem Eingabefeld statt eingequetscht daneben
+
 # 1.0.4
 - Warenkorb: beim Ändern des Wertes erscheint der Hinweis, wenn auf Mindest-/Höchstwert oder Schrittweite angepasst wurde
 - Diagnose-Kommentar im Seitenquelltext entfernt

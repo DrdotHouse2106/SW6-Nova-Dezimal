@@ -1,3 +1,7 @@
+# 1.0.5
+- Off-canvas cart: value can now be changed directly (Enter or "Apply", no page reload)
+- Cart page: "Apply" is a separate button below the input instead of squeezed next to it
+
 # 1.0.4
 - Cart: notice when the changed value was adjusted to min/max/step
 - Removed diagnostic HTML comment

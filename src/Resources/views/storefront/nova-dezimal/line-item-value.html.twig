@@ -1,7 +1,8 @@
 {# Wert einer Dezimal-Position (z. B. 2,35 m²) – im Warenkorb änderbar, sonst nur Anzeige #}
 {% set value = novaDezimal.wert ?? 0 %}
 {% set unit = novaDezimal.einheit ?? '' %}
-{% set editable = displayMode is defined and displayMode == 'default'
+{% set offcanvas = displayMode is defined and displayMode == 'offcanvas' %}
+{% set editable = displayMode is defined and (displayMode == 'default' or offcanvas)
     and config('NovaDezimal.config.cartEdit')
     and (nestingLevel is not defined or nestingLevel < 1)
     and lineItem.id is defined %}
@@ -12,23 +13,24 @@
     </div>
     <div class="line-item-quantity-select-wrapper">
         {% if editable %}
+            {# Im Seiten-Warenkorb (Off-Canvas) übernimmt Shopwares Off-Canvas-Skript das Absenden per AJAX #}
             <form action="{{ path('frontend.nova_dezimal.line_item.update', { id: lineItem.id }) }}"
                   method="post"
-                  class="nova-dezimal-line-form">
-                <input type="hidden" name="redirectTo" value="{{ app.request.attributes.get('_route')|default('frontend.checkout.cart.page') }}">
+                  class="nova-dezimal-line-form{% if offcanvas %} nova-dezimal-line-form-offcanvas{% endif %}">
+                <input type="hidden" name="redirectTo" value="{{ offcanvas ? 'frontend.cart.offcanvas' : (app.request.attributes.get('_route')|default('frontend.checkout.cart.page')) }}">
                 <div class="input-group input-group-sm">
                     <input type="text"
                            inputmode="decimal"
                            autocomplete="off"
                            name="novaDezimalWert"
-                           class="form-control"
+                           class="form-control{% if offcanvas %} js-offcanvas-cart-change-quantity-number{% endif %}"
                            value="{{ value|number_format(2, ',', '') }}"
                            aria-label="{{ (novaDezimal.bezeichnung ?? '') ?: unit }} – {{ lineItem.label }}">
                     <span class="input-group-text">{{ unit }}</span>
-                    <button type="submit" class="btn btn-outline-primary" title="{{ 'novaDezimal.apply'|trans|striptags }}">
-                        {{ 'novaDezimal.apply'|trans|sw_sanitize }}
-                    </button>
                 </div>
+                <button type="submit" class="btn btn-sm btn-outline-primary w-100 mt-1 nova-dezimal-line-apply">
+                    {{ 'novaDezimal.apply'|trans|sw_sanitize }}
+                </button>
             </form>
         {% else %}
             <span class="nova-dezimal-line-value">{{ value|number_format(2, ',', '.') }} {{ unit }}</span>

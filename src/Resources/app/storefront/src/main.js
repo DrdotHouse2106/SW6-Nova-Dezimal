@@ -1,8 +1,25 @@
 /*
  * Nova Dezimal – Produktseite: Plus/Minus für den Dezimalwert, Eingabe auf Min/Max/Schritt runden,
- * Live-Gesamtpreis. Ohne Build-Schritt lauffähig (dist/storefront/js/nova-dezimal/nova-dezimal.js ist dieselbe Datei).
+ * Live-Gesamtpreis, Wert im Seiten-Warenkorb ändern. Ohne Build-Schritt lauffähig (dist/storefront/js/nova-dezimal/nova-dezimal.js ist dieselbe Datei).
  */
 (() => {
+    /*
+     * Seiten-Warenkorb (Off-Canvas): Das Formular nicht normal absenden (sonst lädt die Seite neu),
+     * sondern Shopwares Off-Canvas-Skript per „change“ sofort anstoßen. Es schickt das Formular
+     * per AJAX und ersetzt den Warenkorb-Inhalt.
+     */
+    document.addEventListener('submit', (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || !form.classList.contains('nova-dezimal-line-form-offcanvas')) {
+            return;
+        }
+        event.preventDefault();
+        const input = form.querySelector('input[name="novaDezimalWert"]');
+        if (input) {
+            input.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { submitImmediately: true } }));
+        }
+    }, true);
+
     if (!window.PluginManager || !window.PluginBaseClass) {
         return;
     }
