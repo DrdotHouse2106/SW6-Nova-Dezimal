@@ -1,3 +1,7 @@
+# 1.0.4
+- Cart: notice when the changed value was adjusted to min/max/step
+- Removed diagnostic HTML comment
+
 # 1.0.3
 - Cart: product data for decimal positions is loaded when missing, so validation and price run on every calculation
 

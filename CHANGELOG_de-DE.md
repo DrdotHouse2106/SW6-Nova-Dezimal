@@ -1,3 +1,7 @@
+# 1.0.4
+- Warenkorb: beim Ändern des Wertes erscheint der Hinweis, wenn auf Mindest-/Höchstwert oder Schrittweite angepasst wurde
+- Diagnose-Kommentar im Seitenquelltext entfernt
+
 # 1.0.3
 - Warenkorb: Produktdaten für Dezimal-Positionen werden beim erneuten Laden selbst nachgeladen – Prüfung von Min/Max/Schritt und Preis laufen damit bei jeder Berechnung (vorher nur beim Hinzufügen)
 

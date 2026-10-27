@@ -42,8 +42,13 @@ class DezimalCartController extends StorefrontController
         $lineItem->setPayloadValue(DezimalPayload::KEY, $payload);
         $cart->markModified();
 
-        $this->cartService->recalculate($cart, $context);
-        $this->addFlash(self::SUCCESS, $this->trans('checkout.cartUpdateSuccess'));
+        $cart = $this->cartService->recalculate($cart, $context);
+        // Hinweise (z. B. „auf Mindestwert angehoben“) anzeigen, sonst die normale Erfolgsmeldung
+        if ($cart->getErrors()->count() > 0) {
+            $this->addCartErrors($cart);
+        } else {
+            $this->addFlash(self::SUCCESS, $this->trans('checkout.cartUpdateSuccess'));
+        }
 
         return $this->createActionResponse($request);
     }
