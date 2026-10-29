@@ -60,6 +60,10 @@
             <argument type="service" id="Nova\Dezimal\Weclapp\WeclappClient"/>
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="logger"/>
+            <call method="setProductCheck">
+                <argument type="service" id="product.repository"/>
+                <argument type="service" id="Nova\Dezimal\Service\DezimalSettingsReader"/>
+            </call>
         </service>
 
         <service id="Nova\Dezimal\ScheduledTask\WeclappCorrectionTask">

@@ -88,19 +88,36 @@ class DezimalCartProcessor implements CartDataCollectorInterface, CartProcessorI
 
     public function process(CartDataCollection $data, Cart $original, Cart $toCalculate, SalesChannelContext $context, CartBehavior $behavior): void
     {
+        $products = $toCalculate->getLineItems()->filterType(LineItem::PRODUCT_LINE_ITEM_TYPE);
+
         if (!$this->config->getBool('NovaDezimal.config.active', $context->getSalesChannelId())) {
+            // Im inaktiven Kanal setzt nur der Browser diesen Schlüssel – nie in die Bestellung übernehmen
+            foreach ($products as $lineItem) {
+                if ($lineItem->hasPayloadValue(DezimalPayload::KEY)) {
+                    $lineItem->removePayloadValue(DezimalPayload::KEY);
+                }
+            }
+
             return;
         }
 
-        foreach ($toCalculate->getLineItems()->filterType(LineItem::PRODUCT_LINE_ITEM_TYPE) as $lineItem) {
-            if (!DezimalPayload::has($lineItem)) {
-                continue;
-            }
-
+        foreach ($products as $lineItem) {
             $product = $data->get('product-' . $lineItem->getReferencedId());
             if (!$product instanceof SalesChannelProductEntity) {
                 $product = $data->get(self::DATA_KEY . $lineItem->getReferencedId());
             }
+
+            if (!DezimalPayload::has($lineItem)) {
+                // Dezimal-Artikel ohne (gültigen) Payload, z. B. per API entfernt: Regeln trotzdem anwenden
+                $settings = $product instanceof SalesChannelProductEntity ? $this->settingsReader->forProduct($product) : null;
+                if ($settings === null) {
+                    continue;
+                }
+                $lineItem->setPayloadValue(DezimalPayload::KEY, $settings->isPieceMode()
+                    ? ['modus' => $settings->mode]
+                    : ['modus' => $settings->mode, 'wert' => (float) $lineItem->getQuantity()]);
+            }
+
             if (!$product instanceof SalesChannelProductEntity) {
                 $this->note($lineItem, 'produktdaten-fehlen:' . get_debug_type($product));
                 continue;

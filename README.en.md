@@ -17,7 +17,7 @@ German (main documentation): [README.md](README.md)
   - The reference price still shows the price per m².
 - **weclapp correction** (optional):
   - Every 10 minutes the sales order position is set to the real amount (e.g. 2.35 m² or 2 × 1.5 = 3 m²). The unit price is converted so the position total stays the same.
-  - Safety: test mode by default, a start date, allowed weclapp statuses only, and only positions that still have the Shopware quantity are touched.
+  - Safety: test mode by default, a start date, allowed weclapp statuses only, and only positions that still have the Shopware quantity are touched. Only orders from sales channels with Nova Decimal active, only positions calculated by the cart and matching the product settings; connection via https only, no redirects.
   - The result is stored on the order (custom fields "Nova Decimal (weclapp)").
   - Console: `bin/console nova-dezimal:weclapp [--order=…] [--test|--write]`.
 

@@ -1,3 +1,10 @@
+# 1.0.8
+- Sicherheit: In Verkaufskanälen, in denen Nova Dezimal aus ist, werden Dezimal-Angaben aus dem Browser nicht mehr in die Bestellung übernommen
+- Sicherheit (weclapp-Korrektur): nur Bestellungen aus Kanälen mit aktivem Nova Dezimal; jede Position wird gegen den Warenkorb-Status, den Positionspreis und die Artikeleinstellungen (Höchstwert, Stückmaß) geprüft, unplausible Positionen werden nicht geändert und als `fehler` markiert
+- Sicherheit: Mindestwert, Höchstwert und Schrittweite gelten auch, wenn die Dezimal-Angaben einer Position (z. B. per API) entfernt wurden
+- weclapp: Verbindung nur noch über `https://`, keine Weiterleitungen; fehlende Menge in der weclapp-Antwort bricht den Lauf nicht mehr ab
+- weclapp: Status und Info an der Bestellung werden nur noch geschrieben, wenn sich etwas ändert (bisher alle 10 Minuten bei „wartet“/„test“)
+
 # 1.0.7
 - Produktseite: Eingabefeld genau so hoch wie der Kaufen-Button
 

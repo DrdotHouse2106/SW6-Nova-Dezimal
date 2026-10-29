@@ -61,6 +61,8 @@ class WeclappClient
             ],
             'query' => $query,
             'timeout' => 20,
+            // Token nie an eine andere Adresse weiterreichen
+            'max_redirects' => 0,
         ];
         if ($body !== null) {
             $options['json'] = $body;
@@ -89,7 +91,9 @@ class WeclappClient
     {
         $url = trim($this->config->getString('NovaDezimal.config.weclappUrl'));
         $url = rtrim($url, '/');
-        if ($url !== '' && !str_starts_with($url, 'http')) {
+        // Nur verschlüsselt: der API-Token geht im Header mit
+        $url = preg_replace('#^[a-z][a-z0-9+.\-]*://#i', '', $url) ?? $url;
+        if ($url !== '') {
             $url = 'https://' . $url;
         }
 

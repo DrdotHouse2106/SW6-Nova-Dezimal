@@ -2,7 +2,7 @@
     "name": "nova/nova-dezimal",
     "description": "Artikel mit Dezimalmenge verkaufen (z. B. Meter oder Quadratmeter) und Platten mit festem Maß pro Stück – mit optionaler Mengenkorrektur im ERP",
     "type": "shopware-platform-plugin",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "license": "MIT",
     "authors": [
         {

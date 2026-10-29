@@ -1,3 +1,10 @@
+# 1.0.8
+- Security: in sales channels with Nova Decimal disabled, decimal data from the browser is no longer taken into the order
+- Security (weclapp correction): only orders from channels with Nova Decimal active; each position is checked against cart status, position price and product settings (maximum, piece size), implausible positions are not changed and marked `fehler`
+- Security: minimum, maximum and step also apply when the decimal data of a position was removed (e.g. via API)
+- weclapp: connection via `https://` only, no redirects; a missing quantity in the weclapp response no longer aborts the run
+- weclapp: status and info on the order are only written when something changed (previously every 10 minutes for "wartet"/"test")
+
 # 1.0.7
 - Product page: input exactly as tall as the buy button
 

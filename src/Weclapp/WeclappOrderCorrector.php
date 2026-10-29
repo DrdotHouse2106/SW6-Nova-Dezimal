@@ -3,11 +3,15 @@
 namespace Nova\Dezimal\Weclapp;
 
 use Nova\Dezimal\Service\DezimalPayload;
+use Nova\Dezimal\Service\DezimalSettings;
 use Nova\Dezimal\Service\DezimalSettingsReader;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Cart\LineItem\LineItem;
 use Shopware\Core\Checkout\Order\OrderCollection;
+use Shopware\Core\Checkout\Order\Aggregate\OrderLineItem\OrderLineItemEntity;
 use Shopware\Core\Checkout\Order\OrderEntity;
+use Shopware\Core\Content\Product\ProductCollection;
+use Shopware\Core\Content\Product\ProductEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -30,6 +34,8 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
  * - nur Bestellungen ab dem Startdatum (Einstellung), nie ältere, von Hand korrigierte Aufträge
  * - nur Aufträge in den freigegebenen weclapp-Status (Standard: in Erfassung, Auftragsbestätigung gedruckt)
  * - eine Position wird nur geändert, wenn ihre Menge noch der Shopware-Menge entspricht
+ * - nur Bestellungen aus Verkaufskanälen, in denen Nova Dezimal aktiv ist, und nur Positionen, die der
+ *   Warenkorb berechnet hat und deren Menge zu den Einstellungen des Artikels passt
  * - Testmodus: es wird nur protokolliert, was geändert würde
  *
  * Ergebnis steht an der Bestellung in den Zusatzfeldern nova_dezimal_weclapp_status / _info.
@@ -47,6 +53,14 @@ class WeclappOrderCorrector
 
     private const DEFAULT_STATUSES = 'ORDER_ENTRY_IN_PROGRESS,ORDER_CONFIRMATION_PRINTED';
 
+    /** @var EntityRepository<ProductCollection>|null */
+    private ?EntityRepository $productRepository = null;
+
+    private ?DezimalSettingsReader $settingsReader = null;
+
+    /** @var array<string, ProductEntity|null> */
+    private array $products = [];
+
     /**
      * @param EntityRepository<OrderCollection> $orderRepository
      */
@@ -56,6 +70,17 @@ class WeclappOrderCorrector
         private readonly SystemConfigService $config,
         private readonly LoggerInterface $logger,
     ) {
+    }
+
+    /**
+     * Setter statt Konstruktor-Argument: ein Update mit noch altem kompiliertem Container führt so nie zu einem Fehler 500.
+     *
+     * @param EntityRepository<ProductCollection> $productRepository
+     */
+    public function setProductCheck(EntityRepository $productRepository, DezimalSettingsReader $settingsReader): void
+    {
+        $this->productRepository = $productRepository;
+        $this->settingsReader = $settingsReader;
     }
 
     public function isEnabled(): bool
@@ -75,11 +100,22 @@ class WeclappOrderCorrector
         $dryRun ??= $this->config->getBool('NovaDezimal.config.weclappDryRun');
         $lines = [];
 
+        $this->products = [];
+
         foreach ($this->loadOrders($context, $limit, $orderNumber) as $order) {
-            [$status, $info] = $this->correctOrder($order, $dryRun);
+            [$status, $info] = $this->correctOrder($order, $dryRun, $context);
 
             $line = \sprintf('Bestellung %s: %s – %s', $order->getOrderNumber(), $status, $info);
             $lines[] = $line;
+
+            // Nur schreiben, wenn sich etwas geändert hat (sonst alle 10 Minuten „Bestellung geändert“)
+            $fields = $order->getCustomFields() ?? [];
+            $previous = (string) ($fields[self::FIELD_INFO] ?? '');
+            $previous = preg_replace('/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}: /', '', $previous) ?? $previous;
+            if (($fields[self::FIELD_STATUS] ?? null) === $status && $previous === mb_substr($info, 0, 982)) {
+                continue;
+            }
+
             $this->logger->info('[Nova Dezimal] ' . $line);
 
             $this->orderRepository->update([[
@@ -101,11 +137,18 @@ class WeclappOrderCorrector
     /**
      * @return array{0: string, 1: string}
      */
-    private function correctOrder(OrderEntity $order, bool $dryRun): array
+    private function correctOrder(OrderEntity $order, bool $dryRun, Context $context): array
     {
-        $positions = $this->dezimalPositions($order);
+        if (!$this->config->getBool('NovaDezimal.config.active', $order->getSalesChannelId())) {
+            return [self::STATUS_SKIPPED, 'Nova Dezimal ist im Verkaufskanal der Bestellung nicht aktiv'];
+        }
+
+        $rejected = [];
+        $positions = $this->dezimalPositions($order, $context, $rejected);
         if ($positions === []) {
-            return [self::STATUS_SKIPPED, 'keine Dezimal-Position'];
+            return $rejected !== []
+                ? [self::STATUS_ERROR, 'nicht plausibel, bitte von Hand prüfen: ' . implode('; ', $rejected)]
+                : [self::STATUS_SKIPPED, 'keine Dezimal-Position'];
         }
 
         try {
@@ -144,8 +187,12 @@ class WeclappOrderCorrector
             $used[] = $index;
 
             $item = $items[$index];
-            $quantity = (float) $item['quantity'];
+            $quantity = (float) ($item['quantity'] ?? 0);
             $target = $position['amount'];
+            if ($quantity <= 0) {
+                $notes[] = $position['number'] . ': Menge in weclapp fehlt';
+                continue;
+            }
 
             if (abs($quantity - $target) < 0.0001) {
                 $notes[] = $position['number'] . ': stimmt bereits (' . $this->num($target) . ' ' . $position['unit'] . ')';
@@ -168,9 +215,10 @@ class WeclappOrderCorrector
             );
         }
 
+        $notes = array_merge($notes, array_map(static fn (string $note): string => $note . ' (nicht plausibel, nicht geändert)', $rejected));
         $info = implode('; ', array_merge($changes, $notes));
         if ($changes === []) {
-            return [$notes !== [] && str_contains($info, 'keine passende') ? self::STATUS_ERROR : self::STATUS_OK, $info];
+            return [$notes !== [] && (str_contains($info, 'keine passende') || $rejected !== []) ? self::STATUS_ERROR : self::STATUS_OK, $info];
         }
 
         if ($dryRun) {
@@ -195,11 +243,16 @@ class WeclappOrderCorrector
     }
 
     /**
+     * @param list<string>|null $rejected Positionen, deren Payload nicht zu Warenkorb und Artikel passt
+     *
+     * @param-out list<string> $rejected
+     *
      * @return list<array{number: string, quantity: int, amount: float, unit: string}>
      */
-    private function dezimalPositions(OrderEntity $order): array
+    private function dezimalPositions(OrderEntity $order, ?Context $context = null, ?array &$rejected = null): array
     {
         $positions = [];
+        $rejected = [];
         foreach ($order->getLineItems() ?? [] as $lineItem) {
             if ($lineItem->getType() !== LineItem::PRODUCT_LINE_ITEM_TYPE) {
                 continue;
@@ -215,6 +268,14 @@ class WeclappOrderCorrector
                 continue;
             }
 
+            if ($context !== null) {
+                $problem = $this->implausible($lineItem, $data, $amount, $context);
+                if ($problem !== null) {
+                    $rejected[] = $number . ': ' . $problem;
+                    continue;
+                }
+            }
+
             $positions[] = [
                 'number' => $number,
                 'quantity' => $lineItem->getQuantity(),
@@ -224,6 +285,55 @@ class WeclappOrderCorrector
         }
 
         return $positions;
+    }
+
+    /**
+     * Prüft den Payload gegen den berechneten Warenkorb-Status und die Einstellungen des Artikels.
+     *
+     * @param array<mixed> $data
+     */
+    private function implausible(OrderLineItemEntity $lineItem, array $data, float $amount, Context $context): ?string
+    {
+        if (($data['status'] ?? null) !== 'berechnet') {
+            return 'Position wurde nicht vom Warenkorb berechnet';
+        }
+
+        $positionPrice = DezimalSettingsReader::float($data['positionsPreis'] ?? null);
+        if ($positionPrice !== null && abs($positionPrice - $lineItem->getTotalPrice()) > 0.02) {
+            return 'Positionspreis weicht ab';
+        }
+
+        if ($this->productRepository === null || $this->settingsReader === null) {
+            return null;
+        }
+
+        $productId = $lineItem->getProductId() ?? $lineItem->getReferencedId();
+        $product = \is_string($productId) && $productId !== '' ? $this->product($productId, $context) : null;
+        $settings = $product !== null ? $this->settingsReader->forProduct($product) : null;
+        if (!$settings instanceof DezimalSettings) {
+            return 'Artikel ist kein Dezimal-Artikel';
+        }
+
+        $quantity = max(1, $lineItem->getQuantity());
+        if ($settings->isPieceMode()) {
+            return abs($amount - $quantity * $settings->pieceArea) > 0.001 ? 'Menge passt nicht zum Stückmaß' : null;
+        }
+
+        return $amount > $settings->max * $quantity + 0.0001 ? 'Menge über dem Höchstwert des Artikels' : null;
+    }
+
+    private function product(string $productId, Context $context): ?ProductEntity
+    {
+        if (!\array_key_exists($productId, $this->products) && $this->productRepository !== null) {
+            $inner = clone $context;
+            $inner->setConsiderInheritance(true);
+            $criteria = new Criteria([$productId]);
+            $criteria->addAssociation('unit');
+            $product = $this->productRepository->search($criteria, $inner)->getEntities()->first();
+            $this->products[$productId] = $product instanceof ProductEntity ? $product : null;
+        }
+
+        return $this->products[$productId] ?? null;
     }
 
     /**

@@ -30,6 +30,8 @@ Schutzregeln:
 - Nur Bestellungen ab dem **Startdatum** werden bearbeitet. Es wird beim Aktivieren automatisch gesetzt. Ältere, von Hand korrigierte Aufträge werden nie angefasst.
 - Nur Aufträge in **freigegebenen weclapp-Status** werden geändert (Standard: in Erfassung, Auftragsbestätigung gedruckt). Gelieferte oder berechnete Aufträge bleiben, wie sie sind.
 - Eine Position wird nur geändert, wenn ihre Menge noch der Shopware-Menge entspricht. Von Hand korrigierte Positionen bleiben unverändert.
+- Nur Bestellungen aus Verkaufskanälen, in denen Nova Dezimal aktiv ist, und nur Positionen, die der Warenkorb berechnet hat und deren Menge zum Artikel passt (Höchstwert bzw. Stückmaß). Unplausible Positionen werden nicht geändert und als `fehler` markiert.
+- Verbindung zu weclapp nur verschlüsselt (`https://`), ohne Weiterleitungen.
 - Das Ergebnis steht an der Bestellung, im Tab Zusatzfelder unter „Nova Dezimal (weclapp)“:
   - `ok`, `test`, `wartet` (noch nicht in weclapp angekommen), `uebersprungen`, `fehler`
   - dazu das Detail „Menge × Preis vorher → nachher“
