@@ -1,3 +1,6 @@
+# 1.0.9
+- Security: whether a cart position is treated as a decimal product is now always decided by the product settings. Product data is loaded for positions without decimal data as well – if the payload of an existing position was removed or replaced via the Store API, minimum, maximum, step and the data for the weclapp correction still apply
+
 # 1.0.8
 - Security: in sales channels with Nova Decimal disabled, decimal data from the browser is no longer taken into the order
 - Security (weclapp correction): only orders from channels with Nova Decimal active; each position is checked against cart status, position price and product settings (maximum, piece size), implausible positions are not changed and marked `fehler`

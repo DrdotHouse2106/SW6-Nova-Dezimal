@@ -1,3 +1,6 @@
+# 1.0.9
+- Sicherheit: Ob eine Warenkorb-Position als Dezimal-Artikel behandelt wird, entscheiden jetzt immer die Artikeleinstellungen. Die Artikeldaten werden dafür auch für Positionen ohne Dezimal-Angaben nachgeladen – wurde der Payload einer schon vorhandenen Position über die Store-API entfernt oder ersetzt, greifen Mindestwert, Höchstwert, Schrittweite und die Angaben für die weclapp-Korrektur trotzdem
+
 # 1.0.8
 - Sicherheit: In Verkaufskanälen, in denen Nova Dezimal aus ist, werden Dezimal-Angaben aus dem Browser nicht mehr in die Bestellung übernommen
 - Sicherheit (weclapp-Korrektur): nur Bestellungen aus Kanälen mit aktivem Nova Dezimal; jede Position wird gegen den Warenkorb-Status, den Positionspreis und die Artikeleinstellungen (Höchstwert, Stückmaß) geprüft, unplausible Positionen werden nicht geändert und als `fehler` markiert

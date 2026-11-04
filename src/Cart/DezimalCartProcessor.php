@@ -56,7 +56,11 @@ class DezimalCartProcessor implements CartDataCollectorInterface, CartProcessorI
 
     /**
      * Shopware lädt Produktdaten nur für neue/geänderte Positionen. Beim erneuten Laden des Warenkorbs fehlen sie –
-     * für Dezimal-Positionen werden sie hier nachgeladen, damit Preis und Prüfung immer laufen.
+     * sie werden hier für alle Produktpositionen nachgeladen, damit Preis und Prüfung immer laufen.
+     *
+     * Bewusst auch für Positionen ohne Dezimal-Payload: Ob eine Position ein Dezimal-Artikel ist, entscheiden die
+     * Produkteinstellungen, nicht der Payload. Der Payload ist über die Store-API änderbar (z. B. per PATCH entfernt),
+     * ohne dass Shopware die Position neu lädt – sonst entfielen Mindestwert, Schrittweite und weclapp-Angaben.
      */
     public function collect(CartDataCollection $data, Cart $original, SalesChannelContext $context, CartBehavior $behavior): void
     {
@@ -67,7 +71,7 @@ class DezimalCartProcessor implements CartDataCollectorInterface, CartProcessorI
         $missing = [];
         foreach ($original->getLineItems()->filterType(LineItem::PRODUCT_LINE_ITEM_TYPE) as $lineItem) {
             $id = $lineItem->getReferencedId();
-            if ($id === null || !DezimalPayload::has($lineItem)) {
+            if ($id === null) {
                 continue;
             }
             if (!$data->get('product-' . $id) instanceof SalesChannelProductEntity && !$data->has(self::DATA_KEY . $id)) {
@@ -108,7 +112,7 @@ class DezimalCartProcessor implements CartDataCollectorInterface, CartProcessorI
             }
 
             if (!DezimalPayload::has($lineItem)) {
-                // Dezimal-Artikel ohne (gültigen) Payload, z. B. per API entfernt: Regeln trotzdem anwenden
+                // Ohne (gültigen) Payload, z. B. per API entfernt: die Produkteinstellungen entscheiden
                 $settings = $product instanceof SalesChannelProductEntity ? $this->settingsReader->forProduct($product) : null;
                 if ($settings === null) {
                     continue;
