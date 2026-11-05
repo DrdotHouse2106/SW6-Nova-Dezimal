@@ -36,6 +36,10 @@ The weclapp settings are in the plugin configuration.
 - Editing an order in the administration recalculates without the decimal value.
 - Price sorting and filtering for boards uses the stored price per m².
 
+## How this plugin was made
+
+This plugin was developed with the help of AI (Claude by Anthropic). The requirements come from running several Shopware shops day to day; the code was written and revised with AI. It is checked with automated tests and static analysis (where present in the repository), regular security reviews of the code and in production use in the author's own shops. Still: use at your own risk and without warranty (see license). Please report bugs and suggestions as an issue. More background: [SW6-Nova-Plugins](https://github.com/DrdotHouse2106/SW6-Nova-Plugins).
+
 ## License
 
 MIT

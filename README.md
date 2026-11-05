@@ -82,6 +82,10 @@ bin/console nova-dezimal:weclapp                        # alle offenen (wie die 
 - **weclapp-Korrektur meldet „keine passende Position“:** Die Artikelnummer in weclapp weicht von der Shopware-Produktnummer ab, oder die Menge wurde schon von Hand geändert.
 - **Betrag in weclapp weicht um 1 Cent ab:** weclapp rundet die Position selbst. Das Detail an der Bestellung nennt den Brutto-Betrag vorher und nachher. Die Nachkommastellen des Einzelpreises lassen sich in der Konfiguration erhöhen.
 
+## Entstehung
+
+Dieses Plugin ist mit Unterstützung von KI entstanden (Claude von Anthropic). Die Anforderungen kommen aus dem täglichen Betrieb mehrerer Shopware-Shops; der Code wurde mit KI geschrieben und überarbeitet. Geprüft wird er mit automatischen Tests und statischer Analyse (soweit im Repository vorhanden), mit regelmäßigen Sicherheitsprüfungen des Codes und im Echtbetrieb in den eigenen Shops. Trotzdem gilt: Nutzung auf eigene Verantwortung und ohne Garantie (siehe Lizenz). Fehler und Verbesserungsvorschläge bitte als Issue melden. Mehr zum Hintergrund: [SW6-Nova-Plugins](https://github.com/DrdotHouse2106/SW6-Nova-Plugins).
+
 ## Lizenz
 
 MIT
